@@ -45,8 +45,4 @@ transparency on the selected body with a single keypress.
   for bodies, occurrences, and components, placed after Opacity Control.
 - Themed (light/dark) cube icon.
 
-## Credits
-
-The opacity-flip logic mirrors the translucency toggle in the VerticalTimeline add-in.
-
 MIT licensed — see [LICENSE-MIT](LICENSE-MIT).
