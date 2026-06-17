@@ -75,7 +75,7 @@ def run(context):
 
         # Inject the command into the native right-click (marking) menu.
         _add_handler(ui.markingMenuDisplaying,
-                     adsk.core.MarkingMenuDisplayingEventHandler, on_marking_menu)
+                     adsk.core.MarkingMenuEventHandler, on_marking_menu)
 
         print(NAME + ' running')
     except Exception:
@@ -105,7 +105,7 @@ def _remove_ui():
 # Marking menu + command flow
 # =============================================================================
 
-def on_marking_menu(args: adsk.core.MarkingMenuDisplayingEventArgs):
+def on_marking_menu(args: adsk.core.MarkingMenuEventArgs):
     '''Add our command to the linear (right-click) menu when the selection has
     something whose opacity we can flip.'''
     global _pending
