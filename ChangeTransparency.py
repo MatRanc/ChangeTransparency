@@ -69,7 +69,7 @@ def run(context):
             CMD_ID,
             'Change Transparency (50% / 100%)',
             'Toggle the selected body/component between 50% and 100% opacity.',
-            '')  # no icon: context-menu items render fine without one
+            'resources/icon')  # cube: solid front, dotted-wireframe back
         _add_handler(cmd_def.commandCreated,
                      adsk.core.CommandCreatedEventHandler, on_command_created)
 
