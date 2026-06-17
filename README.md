@@ -18,15 +18,15 @@ native Opacity Control submenu.
 
 ## Install
 
-Self-contained — no dependencies. Copy or symlink this folder into your Fusion
-AddIns directory:
+Self-contained — no dependencies. Download the latest
+[release](https://github.com/MatRanc/ChangeTransparency/releases) zip and unzip the
+`ChangeTransparency` folder into your Fusion AddIns directory:
 
 - **macOS:** `~/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/`
 - **Windows:** `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\`
 
-```sh
-ln -s "$PWD" "$HOME/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/ChangeTransparency"
-```
+(For development you can symlink the repo instead:
+`ln -s "$PWD" "$HOME/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/ChangeTransparency"`.)
 
 Then in Fusion: **Utilities → Add-Ins** (or `Shift+S`) → select **ChangeTransparency**
 → **Run**. With `runOnStartup` enabled (the default in the manifest) it loads
@@ -36,6 +36,14 @@ automatically on launch.
 
 Assign a keyboard shortcut to the command via Fusion's UI customization to change
 transparency on the selected body with a single keypress.
+
+## Changelog
+
+### v0.1.0
+
+- First release. Adds the **Change Transparency (50% / 100%)** right-click menu item
+  for bodies, occurrences, and components, placed after Opacity Control.
+- Themed (light/dark) cube icon.
 
 ## Credits
 
