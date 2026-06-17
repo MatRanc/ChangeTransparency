@@ -36,10 +36,9 @@ opacity on the selected body with a single keypress.
 
 ## Credits
 
-Built from [FusionAddinTemplate]; bundles [thomasa88lib] (MIT, © 2020 Thomas Axelsson).
+Built from a Fusion add-in template; bundles [thomasa88lib] (MIT, © 2020 Thomas Axelsson).
 The opacity-flip logic mirrors the translucency toggle in the VerticalTimeline add-in.
 
 MIT licensed — see [LICENSE-MIT](LICENSE-MIT).
 
-[FusionAddinTemplate]: https://github.com/
 [thomasa88lib]: https://github.com/thomasa88/thomasa88lib
