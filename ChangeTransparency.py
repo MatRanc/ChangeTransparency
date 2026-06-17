@@ -1,40 +1,26 @@
 # Author-Mathieu
-# Description-Toggle selected bodies between 50% and 100% opacity from the right-click menu.
+# Description-Change the transparency of selected bodies: toggle between 50% and 100% opacity from the right-click menu.
 
 # =============================================================================
-# ToggleOpacity
+# ChangeTransparency
 #
-# Adds a "Toggle Opacity (50% / 100%)" item to Fusion's native right-click
+# A Fusion 360 alternative to SolidWorks' "Change Transparency". Adds a
+# "Change Transparency (50% / 100%)" item to Fusion's native right-click
 # (marking) menu. Click it to flip the selected body/component between 50% and
 # 100% opacity, instead of digging through the Opacity Control submenu.
 #
-# Built from FusionAddinTemplate. The opacity flip mirrors the one in Thomas
-# Axelsson's VerticalTimeline add-in.
+# Self-contained: no external libraries. The opacity flip mirrors the one in
+# Thomas Axelsson's VerticalTimeline add-in.
 #
 # Copyright (c) 2026 Mathieu. MIT licensed - see LICENSE-MIT.
-# thomasa88lib (in ./thomasa88lib) is (c) 2020 Thomas Axelsson, MIT licensed.
 # =============================================================================
 
 import adsk.core
 import adsk.fusion
-import adsk.cam
-import os
+import traceback
 
-NAME = 'Toggle Opacity'
-FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-
-from .thomasa88lib import utils
-from .thomasa88lib import events
-from .thomasa88lib import error
-from .thomasa88lib import manifest
-
-import importlib
-importlib.reload(utils)
-importlib.reload(events)
-importlib.reload(error)
-importlib.reload(manifest)
-
-ID_PREFIX = 'matranc_toggleOpacity_'
+NAME = 'Change Transparency'
+ID_PREFIX = 'matranc_changeTransparency_'
 CMD_ID = ID_PREFIX + 'cmd'
 
 TRANSLUCENT = 0.5
@@ -43,13 +29,28 @@ OPAQUE = 1.0
 app: adsk.core.Application = None
 ui: adsk.core.UserInterface = None
 
-error_catcher = error.ErrorCatcher(msgbox_in_debug=False)
-events_manager = events.EventsManager(error_catcher)
-manifest_data = manifest.read()
+# (event, handler) pairs, kept alive so Fusion doesn't garbage-collect the
+# handlers, and so stop() can detach them.
+_handlers = []
 
 # Entities under the cursor, captured when the marking menu is built and read
 # back when the command executes (the menu args are gone by execute time).
 _pending = []
+
+
+def _add_handler(event, handler_cls, callback):
+    '''Register `callback` for `event`, wrapped so exceptions surface as a
+    message box (Fusion silently swallows them otherwise).'''
+    class _Handler(handler_cls):
+        def notify(self, args):
+            try:
+                callback(args)
+            except Exception:
+                if ui:
+                    ui.messageBox(NAME + ' error:\n' + traceback.format_exc())
+    handler = _Handler()
+    event.add(handler)
+    _handlers.append((event, handler))
 
 
 # =============================================================================
@@ -58,7 +59,7 @@ _pending = []
 
 def run(context):
     global app, ui
-    with error_catcher:
+    try:
         app = adsk.core.Application.get()
         ui = app.userInterface
 
@@ -66,24 +67,32 @@ def run(context):
 
         cmd_def = ui.commandDefinitions.addButtonDefinition(
             CMD_ID,
-            'Toggle Opacity (50% / 100%)',
+            'Change Transparency (50% / 100%)',
             'Toggle the selected body/component between 50% and 100% opacity.',
             '')  # no icon: context-menu items render fine without one
-        events_manager.add_handler(cmd_def.commandCreated,
-                                   callback=on_command_created)
+        _add_handler(cmd_def.commandCreated,
+                     adsk.core.CommandCreatedEventHandler, on_command_created)
 
         # Inject the command into the native right-click (marking) menu.
-        events_manager.add_handler(ui.markingMenuDisplaying,
-                                   callback=on_marking_menu)
+        _add_handler(ui.markingMenuDisplaying,
+                     adsk.core.MarkingMenuDisplayingEventHandler, on_marking_menu)
 
-        print(f'{NAME} v{manifest_data["version"]} running')
+        print(NAME + ' running')
+    except Exception:
+        if ui:
+            ui.messageBox(NAME + ' failed to start:\n' + traceback.format_exc())
 
 
 def stop(context):
-    with error_catcher:
-        events_manager.clean_up()
+    try:
+        for event, handler in _handlers:
+            event.remove(handler)
+        _handlers.clear()
         _remove_ui()
-        print(f'{NAME} stopped')
+        print(NAME + ' stopped')
+    except Exception:
+        if ui:
+            ui.messageBox(NAME + ' error on stop:\n' + traceback.format_exc())
 
 
 def _remove_ui():
@@ -120,7 +129,7 @@ def on_marking_menu(args: adsk.core.MarkingMenuDisplayingEventArgs):
 
 
 def on_command_created(args: adsk.core.CommandCreatedEventArgs):
-    events_manager.add_handler(args.command.execute, callback=on_execute)
+    _add_handler(args.command.execute, adsk.core.CommandEventHandler, on_execute)
 
 
 def on_execute(args: adsk.core.CommandEventArgs):

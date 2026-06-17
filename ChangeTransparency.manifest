@@ -4,7 +4,7 @@
 	"id":	"6a8a2398-e580-40c9-9895-00d2752fb845",
 	"author":	"Mathieu",
 	"description":	{
-		"":	"Toggle selected bodies between 50% and 100% opacity from the right-click menu."
+		"":	"Change the transparency of selected bodies: toggle between 50% and 100% opacity from the right-click menu. A Fusion alternative to SolidWorks' Change Transparency."
 	},
 	"version":	"0.1.0",
 	"runOnStartup":	true,
