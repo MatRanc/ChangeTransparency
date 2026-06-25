@@ -6,7 +6,7 @@
 	"description":	{
 		"":	"Change the transparency of selected bodies: toggle between 50% and 100% opacity from the right-click menu. A Fusion alternative to SolidWorks' Change Transparency."
 	},
-	"version":	"0.1.0",
+	"version":	"0.1.1",
 	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
 	"editEnabled":	true

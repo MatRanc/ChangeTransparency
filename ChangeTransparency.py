@@ -53,6 +53,18 @@ def _add_handler(event, handler_cls, callback):
     _handlers.append((event, handler))
 
 
+def _detach_handlers():
+    '''Remove every registered handler. Safe to call repeatedly - run() uses it
+    so a second Run (without a Stop) does not stack a second marking-menu /
+    execute handler, which would duplicate the menu item and flip twice.'''
+    for event, handler in _handlers:
+        try:
+            event.remove(handler)
+        except Exception:
+            pass
+    _handlers.clear()
+
+
 # =============================================================================
 # Lifecycle
 # =============================================================================
@@ -63,6 +75,7 @@ def run(context):
         app = adsk.core.Application.get()
         ui = app.userInterface
 
+        _detach_handlers()  # drop handlers from a previous Run that wasn't Stopped
         _remove_ui()  # clean up if a previous stop() did not run
 
         cmd_def = ui.commandDefinitions.addButtonDefinition(
@@ -85,9 +98,7 @@ def run(context):
 
 def stop(context):
     try:
-        for event, handler in _handlers:
-            event.remove(handler)
-        _handlers.clear()
+        _detach_handlers()
         _remove_ui()
         print(NAME + ' stopped')
     except Exception:
@@ -118,6 +129,10 @@ def on_marking_menu(args: adsk.core.MarkingMenuEventArgs):
         return
 
     controls = args.linearMarkingMenu.controls
+    # Idempotent: if our command is already in this menu (e.g. a second handler
+    # slipped through), don't add it again.
+    if any(CMD_ID in (c.id or '') for c in controls):
+        return
     # Place right after the native "Opacity Control" item if we can find it,
     # otherwise just append.
     opacity_id = next((c.id for c in controls
@@ -155,11 +170,17 @@ def on_execute(args: adsk.core.CommandEventArgs):
 
 def _target_bodies(entity):
     '''Bodies whose opacity we flip. Occurrences have no settable opacity, so
-    fall through to their component's bodies.'''
+    fall through to their bodies (recursing into sub-components). Faces/edges
+    picked in the 3D viewport resolve to their parent body.'''
     if isinstance(entity, adsk.fusion.BRepBody):
         return [entity]
     if isinstance(entity, adsk.fusion.Occurrence):
-        return list(entity.component.bRepBodies)
+        return _occurrence_bodies(entity)
+    # Right-clicking a body in the 3D view actually selects a face (or edge);
+    # both expose the owning body via `.body`.
+    body = getattr(entity, 'body', None)
+    if isinstance(body, adsk.fusion.BRepBody):
+        return [body]
     bodies = getattr(entity, 'bodies', None)
     if bodies and bodies.count:
         return list(bodies)
@@ -167,3 +188,13 @@ def _target_bodies(entity):
     if parent:
         return list(parent.bRepBodies)
     return []
+
+
+def _occurrence_bodies(occ):
+    '''Every body in an occurrence, recursing through child occurrences so the
+    flip reaches whole assemblies/sub-components - not just the component's own
+    bodies (which is empty for an assembly and made the menu item vanish).'''
+    bodies = list(occ.bRepBodies)
+    for child in occ.childOccurrences:
+        bodies += _occurrence_bodies(child)
+    return bodies

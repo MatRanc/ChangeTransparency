@@ -39,6 +39,17 @@ transparency on the selected body with a single keypress.
 
 ## Changelog
 
+### v0.1.1
+
+- Fix the menu item vanishing on assemblies / sub-components — `_target_bodies`
+  now recurses through child occurrences instead of only flipping a component's
+  own bodies.
+- Right-clicking a face or edge in the 3D viewport now resolves to its owning
+  body, so the toggle works on those picks too.
+- Re-running the add-in without a Stop no longer stacks duplicate handlers (which
+  duplicated the menu item and flipped twice); the marking-menu insert is also
+  idempotent.
+
 ### v0.1.0
 
 - First release. Adds the **Change Transparency (50% / 100%)** right-click menu item
