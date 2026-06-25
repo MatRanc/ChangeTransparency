@@ -39,6 +39,13 @@ transparency on the selected body with a single keypress.
 
 ## Changelog
 
+### v0.1.2
+
+- Fix a crash when right-clicking a **suppressed** occurrence (e.g. a suppressed
+  "body to component" feature) — its invalid proxy path threw an
+  `InternalValidationError` while building the menu. Suppressed/invalid
+  occurrences are now skipped instead.
+
 ### v0.1.1
 
 - Fix the menu item vanishing on assemblies / sub-components — `_target_bodies`

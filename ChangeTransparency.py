@@ -194,7 +194,12 @@ def _occurrence_bodies(occ):
     '''Every body in an occurrence, recursing through child occurrences so the
     flip reaches whole assemblies/sub-components - not just the component's own
     bodies (which is empty for an assembly and made the menu item vanish).'''
-    bodies = list(occ.bRepBodies)
-    for child in occ.childOccurrences:
-        bodies += _occurrence_bodies(child)
+    # ponytail: a suppressed/invalid occurrence raises InternalValidationError
+    # on .childOccurrences (path.valid() fails); treat it as having no bodies.
+    try:
+        bodies = list(occ.bRepBodies)
+        for child in occ.childOccurrences:
+            bodies += _occurrence_bodies(child)
+    except RuntimeError:
+        return []
     return bodies
