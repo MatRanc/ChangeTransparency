@@ -9,8 +9,9 @@ native Opacity Control submenu.
 
 ## Behavior
 
-- Works on a selected **body**, **occurrence**, or **component** (occurrences have
-  no settable opacity, so the component's bodies are flipped), and on multi-selections.
+- Works on a selected **body** (BRep or **mesh**), **occurrence**, or **component**
+  (occurrences have no settable opacity, so the component's bodies are flipped), and
+  on multi-selections.
 - Toggle rule: if anything in the selection is already transparent, everything goes
   back to 100% opaque; otherwise everything drops to 50%.
 - The menu item only appears when the selection has something flippable, and is
@@ -38,6 +39,13 @@ Assign a keyboard shortcut to the command via Fusion's UI customization to chang
 transparency on the selected body with a single keypress.
 
 ## Changelog
+
+### v0.1.3
+
+- Support **mesh bodies** (imported STL/OBJ) — the menu item now appears for them
+  and the flip includes a component's/occurrence's mesh bodies alongside BRep ones.
+  Viewport picks work too: clicking a mesh in the 3D view selects a face group,
+  which now resolves to its owning mesh body.
 
 ### v0.1.2
 

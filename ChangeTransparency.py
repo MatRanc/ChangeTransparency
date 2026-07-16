@@ -169,24 +169,25 @@ def on_execute(args: adsk.core.CommandEventArgs):
 
 
 def _target_bodies(entity):
-    '''Bodies whose opacity we flip. Occurrences have no settable opacity, so
-    fall through to their bodies (recursing into sub-components). Faces/edges
-    picked in the 3D viewport resolve to their parent body.'''
-    if isinstance(entity, adsk.fusion.BRepBody):
+    '''Bodies (BRep or mesh) whose opacity we flip. Occurrences have no settable
+    opacity, so fall through to their bodies (recursing into sub-components).
+    Faces/edges picked in the 3D viewport resolve to their parent body.'''
+    if isinstance(entity, (adsk.fusion.BRepBody, adsk.fusion.MeshBody)):
         return [entity]
     if isinstance(entity, adsk.fusion.Occurrence):
         return _occurrence_bodies(entity)
     # Right-clicking a body in the 3D view actually selects a face (or edge);
-    # both expose the owning body via `.body`.
-    body = getattr(entity, 'body', None)
-    if isinstance(body, adsk.fusion.BRepBody):
+    # both expose the owning body via `.body`. Mesh bodies select a FaceGroup,
+    # which points back via `.parentBody`.
+    body = getattr(entity, 'body', None) or getattr(entity, 'parentBody', None)
+    if isinstance(body, (adsk.fusion.BRepBody, adsk.fusion.MeshBody)):
         return [body]
     bodies = getattr(entity, 'bodies', None)
     if bodies and bodies.count:
         return list(bodies)
     parent = getattr(entity, 'parentComponent', None)
     if parent:
-        return list(parent.bRepBodies)
+        return list(parent.bRepBodies) + list(parent.meshBodies)
     return []
 
 
@@ -197,7 +198,7 @@ def _occurrence_bodies(occ):
     # ponytail: a suppressed/invalid occurrence raises InternalValidationError
     # on .childOccurrences (path.valid() fails); treat it as having no bodies.
     try:
-        bodies = list(occ.bRepBodies)
+        bodies = list(occ.bRepBodies) + list(occ.meshBodies)
         for child in occ.childOccurrences:
             bodies += _occurrence_bodies(child)
     except RuntimeError:
