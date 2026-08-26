@@ -6,6 +6,7 @@ selected body/component between 50% and 100% opacity — no more digging through
 native Opacity Control submenu.
 
 ![context menu](docs/screenshot.png)
+![demo](docs/demo.gif)
 
 ## Behavior
 
