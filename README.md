@@ -72,4 +72,4 @@ transparency on the selected body with a single keypress.
   for bodies, occurrences, and components, placed after Opacity Control.
 - Themed (light/dark) cube icon.
 
-MIT licensed — see [LICENSE-MIT](LICENSE-MIT).
+GNU Affero General Public License v3.0 licensed — see [LICENSE](LICENSE).
